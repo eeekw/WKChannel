@@ -5,8 +5,10 @@
 //  Created by Leaf on 2021/4/11.
 //
 
-public typealias WKChannelNext<T> = (T, @escaping (T, @escaping (T) -> Void) -> Void) -> Void
-public typealias WKChannelMiddleware<T> = (T, (WKChannelNext<T>)) -> Void
+public typealias WKChannelMiddlewarePre<T> = (T) -> Void
+public typealias WKChannelMiddlewareCallback<T> = (T, @escaping WKChannelMiddlewarePre<T>) -> Void
+public typealias WKChannelMiddlewareNext<T> = (T, @escaping WKChannelMiddlewareCallback<T> ) -> Void
+public typealias WKChannelMiddleware<T> = (T, @escaping (WKChannelMiddlewareNext<T>)) -> Void
 
 typealias WKChannelComposeReturn<T> = (T, ((T) -> Void)?) -> Void
 
@@ -17,7 +19,7 @@ func compose<T: Any>(_ fns: [WKChannelMiddleware<T>]) -> WKChannelComposeReturn<
         var index = -1
         func dispatch(_ i: Int, _ context: T, _ callback: @escaping (T) -> Void) {
             
-            guard index == i else {
+            guard index != i else {
                 debugPrint("WKChannelNext function called multiple times")
                 return
             }
@@ -29,9 +31,9 @@ func compose<T: Any>(_ fns: [WKChannelMiddleware<T>]) -> WKChannelComposeReturn<
             }
             
             let fn = fns[i]
-            fn(context) { (context: T, pre: @escaping (T, @escaping (T) -> Void) -> Void)  in
+            fn(context) {/* next */ (context: T, cb: @escaping WKChannelMiddlewareCallback<T>)  in
                 dispatch(i + 1, context) { (ctx: T) in
-                    pre(ctx) {(c: T) in
+                    cb(ctx) {/* pre */(c: T) in
                         callback(c)
                     }
                 }
