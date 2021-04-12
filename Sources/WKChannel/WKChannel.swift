@@ -22,6 +22,10 @@ public struct WKChannel {
     public typealias Middleware = WKChannelMiddleware<WKChannelContext>
     
     private var middlewares = [Middleware]()
+    
+    public init() {
+        
+    }
             
     public mutating func add(_ fn: @escaping Middleware) -> Void {
         middlewares.append(fn)
@@ -30,39 +34,77 @@ public struct WKChannel {
     mutating func call(_ message: Any, _ webView: WKWebView) -> Void {
         let fn = compose(middlewares)
         
-        let context = WKChannelContext(message)
+        debugPrint("WKChannel: start")
+        debugPrint("WKChannel: receive")
         
-        fn(context) { ctx in
-            webView.evaluateJavaScript(ctx.callback.toString()) { (data: Any?, error: Error?) in
-                print(data ?? "no data", error ?? "no error", separator: "---", terminator: ":end")
+        guard let msg = message as? Dictionary<String, Any> else {
+            debugPrint("Invalid format: please check your message!")
+            return
+        }
+        
+        guard let m = msg["name"] as? String else {
+            debugPrint("Invalid format: please check your event name")
+            return
+        }
+        
+        guard m != "" else {
+            debugPrint("Invalid value: please check your event name")
+            return
+        }
+         
+        debugPrint("WKChannel: create context")
+        let context = WKChannelContext(msg)
+        
+        debugPrint("WKChannel: call middleware")
+        fn(context) { context in
+            guard let callback = context.callback else {
+                debugPrint("WKChannel: end")
+                return
+            }
+            debugPrint("WKChannel: send callback")
+            webView.evaluateJavaScript(callback.toString()) { (data: Any?, error: Error?) in
+                debugPrint("WKChannel: callback ", (error == nil) ? "completes": "fails")
+                debugPrint("Callback: ", error ?? data ?? "empty")
+                debugPrint("WKChannel: end")
             }
         }
     }
 }
 
 public struct WKChannelContext {
-    var event: WKChannelEvent
-    var callback: WKChannelCallback
+    public var event: WKChannelEvent
+    public var callback: WKChannelCallback?
     
-    init(_ message: Any) {
+    init(_ message: Dictionary<String, Any>) {
         
-        let msg = message as! Dictionary<String, Any>
+        let name = message["name"] as! String
+        let arguments = message["arguments"] as? Dictionary<String, Any> ?? [:]
+        let callback = message["callback"] as? String
+                
+        event = WKChannelEvent(name: name, arguments: arguments)
+        if let cb = callback {
+            self.callback = WKChannelCallback(name: cb, arguments: [:])
+        }
         
-        event = WKChannelEvent(name: msg["name"] as! String, arguments: msg["arguments"] as! Dictionary<String, Any>)
-        callback = WKChannelCallback(name: msg["callback"] as! String, arguments: [:])
-        
+        debugPrint("WKChannel: context", self)
     }
 }
 
 public struct WKChannelEvent {
-    var name: String
-    var arguments: Dictionary<String, Any>
+    public var name: String
+    public var arguments: Dictionary<String, Any>
 }
 
 public struct WKChannelCallback {
-    var name: String
-    var arguments: Dictionary<String, Any>
-    func toString() -> String {
-        return "\(name)(\(arguments))"
+    public var name: String
+    public var arguments: Dictionary<String, Any>
+    public func toString() -> String {
+        do {
+            let json = try JSONSerialization.data(withJSONObject: arguments)
+            return "\(name)(\(String(data: json, encoding: .utf8) ?? ""))"
+        } catch {
+            debugPrint("Invalid format: please check your callback arguments")
+            return name
+        }
     }
 }

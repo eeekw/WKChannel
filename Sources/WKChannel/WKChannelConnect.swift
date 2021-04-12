@@ -24,7 +24,7 @@ public struct WKChannelConnect {
         return WKChannelScriptMessageHandler(self)
     }()
     
-    init(_ name: String = "WKCHANNEL_NAME_DEFAULT", _ channel: WKChannel) {
+    public init(_ channel: WKChannel, _ name: String = "WKCHANNEL_NAME_DEFAULT") {
         _name = name
         _channel = channel
     }
