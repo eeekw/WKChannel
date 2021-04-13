@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "WKChannelRouter",
             targets: ["WKChannelRouter"]),
+        .library(
+            name: "WKChannelSession",
+            targets: ["WKChannelSession"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -29,6 +32,9 @@ let package = Package(
             dependencies: ["WKChannel"]),
         .target(
             name: "WKChannelRouter",
+            dependencies: ["WKChannel"]),
+        .target(
+            name: "WKChannelSession",
             dependencies: ["WKChannel"]),
     ]
 )
