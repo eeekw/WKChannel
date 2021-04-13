@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09051CE22624BB0A004E2BC0 /* WKChannel in Frameworks */ = {isa = PBXBuildFile; productRef = 09051CE12624BB0A004E2BC0 /* WKChannel */; };
 		093AED792624073200FF9FB5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093AED782624073200FF9FB5 /* AppDelegate.swift */; };
 		093AED7B2624073200FF9FB5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093AED7A2624073200FF9FB5 /* SceneDelegate.swift */; };
 		093AED7D2624073200FF9FB5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093AED7C2624073200FF9FB5 /* ViewController.swift */; };
 		093AED802624073200FF9FB5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 093AED7E2624073200FF9FB5 /* Main.storyboard */; };
 		093AED822624073300FF9FB5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 093AED812624073300FF9FB5 /* Assets.xcassets */; };
 		093AED852624073300FF9FB5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 093AED832624073300FF9FB5 /* LaunchScreen.storyboard */; };
-		09B2718A26241CB2002C5C9B /* WKChannel in Frameworks */ = {isa = PBXBuildFile; productRef = 09B2718926241CB2002C5C9B /* WKChannel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09B2718A26241CB2002C5C9B /* WKChannel in Frameworks */,
+				09051CE22624BB0A004E2BC0 /* WKChannel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,7 +96,7 @@
 			);
 			name = WKChannelExample;
 			packageProductDependencies = (
-				09B2718926241CB2002C5C9B /* WKChannel */,
+				09051CE12624BB0A004E2BC0 /* WKChannel */,
 			);
 			productName = WKChannelExample;
 			productReference = 093AED752624073200FF9FB5 /* WKChannelExample.app */;
@@ -356,7 +356,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		09B2718926241CB2002C5C9B /* WKChannel */ = {
+		09051CE12624BB0A004E2BC0 /* WKChannel */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WKChannel;
 		};
