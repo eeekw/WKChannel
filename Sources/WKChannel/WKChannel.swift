@@ -20,6 +20,9 @@ public struct WKChannel {
 //    }
     
     public typealias Middleware = WKChannelMiddleware<WKChannelContext>
+    public typealias MiddlewareNext = WKChannelMiddlewareNext<WKChannelContext>
+    public typealias MiddlewarePre = WKChannelMiddlewarePre<WKChannelContext>
+    public typealias MiddlewareCallback = WKChannelMiddlewareCallback<WKChannelContext>
     
     private var middlewares = [Middleware]()
     
