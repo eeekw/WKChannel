@@ -7,4 +7,7 @@
    <FileRef
       location = "group:Examples/WKChannelExample/WKChannelExample.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:Examples/WKChannelRouterExample/WKChannelRouterExample.xcodeproj">
+   </FileRef>
 </Workspace>
