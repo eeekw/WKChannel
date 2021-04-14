@@ -16,7 +16,7 @@ public struct WKChannelContext {
         let name = message["name"] as! String
         let arguments = message["arguments"] as? Dictionary<String, Any> ?? [:]
         let options = message["options"] as? Dictionary<String, Any> ?? [:]
-        let callback = message["callback"] as? String
+        let callback = options["callback"] as? String
                 
         event = WKChannelEvent(name: name, arguments: arguments, options: options)
         if let cb = callback {
