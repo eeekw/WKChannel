@@ -37,6 +37,13 @@ public struct WKChannelCallback: WKChannelMessage {
     public var name: String
     public var arguments: Dictionary<String, Any>
     public var options: Dictionary<String, Any>
+    
+    public init(name: String, arguments: Dictionary<String, Any> = [:], options: Dictionary<String, Any> = [:]) {
+        self.name = name
+        self.arguments = arguments
+        self.options = options
+    }
+    
     public func toString() -> String {
         do {
             let json = try JSONSerialization.data(withJSONObject: arguments)
