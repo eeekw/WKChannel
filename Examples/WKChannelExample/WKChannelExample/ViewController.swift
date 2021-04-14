@@ -77,8 +77,8 @@ class ViewController: UIViewController {
         webView.evaluateJavaScript("""
             window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({
             name: "eventName",
-            callback: "callbackName",
-            arguments: {a: 1,b: 2}
+            arguments: {a: 1,b: 2},
+            options: {callback: "callbackName"}
             })
             function callbackName(parameter) {
                 window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({name: "printCallback", arguments: parameter})
