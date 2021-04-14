@@ -9,15 +9,16 @@ import UIKit
 import WebKit
 import WKChannel
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WKNavigationDelegate {
 
-    var webView: WKWebView?
+    var channel: WKChannel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
         var channel = WKChannel()
+        self.channel = channel
         channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
             print("WKChannelExample: ", "first middleware: ", "event: ", context.event, separator: "\n--", terminator: "\n\n")
             var context = context
@@ -53,6 +54,15 @@ class ViewController: UIViewController {
             }
         }
         
+        channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
+            if context.event.name == "printHandlePost" {
+                print("printHandlePost: ", context.event.arguments)
+            }
+            next(context) { context, pre in
+                pre(context)
+            }
+        }
+        
         var connect = WKChannelConnect(channel)
         
         let userContentController = WKUserContentController()
@@ -62,6 +72,7 @@ class ViewController: UIViewController {
         configuration.userContentController = userContentController
         
         let webView = WKWebView(frame: CGRect.zero, configuration: configuration)
+        webView.navigationDelegate = self
         webView.load(URLRequest(url: URL(string: "https://www.baidu.com")!))
         self.view.addSubview(webView)
         webView.translatesAutoresizingMaskIntoConstraints = false
@@ -84,7 +95,17 @@ class ViewController: UIViewController {
                 window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({name: "printCallback", arguments: parameter})
                 return "callback return"
             }
+            function handlePost(parameter) {
+                window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({name: "printHandlePost", arguments: parameter})
+                return "callback return"
+            }
             """, completionHandler: nil)
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        
+        channel?.webView = webView
+        channel?.post(WKChannelCallback(name: "handlePost"))
     }
 }
 
