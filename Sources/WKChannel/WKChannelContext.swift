@@ -15,29 +15,33 @@ public struct WKChannelContext {
         
         let name = message["name"] as! String
         let arguments = message["arguments"] as? Dictionary<String, Any> ?? [:]
+        let options = message["options"] as? Dictionary<String, Any> ?? [:]
         let callback = message["callback"] as? String
                 
-        event = WKChannelEvent(name: name, arguments: arguments)
+        event = WKChannelEvent(name: name, arguments: arguments, options: options)
         if let cb = callback {
-            self.callback = WKChannelCallback(name: cb, arguments: [:])
+            self.callback = WKChannelCallback(name: cb, arguments: [:], options: [:])
         }
         
         debugPrint("WKChannel: context", self)
     }
 }
 
-public struct WKChannelEvent {
+public struct WKChannelEvent: WKChannelMessage {
     public var name: String
     public var arguments: Dictionary<String, Any>
+    public var options: Dictionary<String, Any>
 }
 
-public struct WKChannelCallback {
+public struct WKChannelCallback: WKChannelMessage {
     public var name: String
     public var arguments: Dictionary<String, Any>
+    public var options: Dictionary<String, Any>
     public func toString() -> String {
         do {
             let json = try JSONSerialization.data(withJSONObject: arguments)
-            return "\(name)(\(String(data: json, encoding: .utf8) ?? ""))"
+            let optJson = try JSONSerialization.data(withJSONObject: options)
+            return "\(name)(\(String(data: json, encoding: .utf8) ?? ""), \(String(data: optJson, encoding: .utf8) ?? "" ))"
         } catch {
             debugPrint("Invalid format: please check your callback arguments")
             return name
