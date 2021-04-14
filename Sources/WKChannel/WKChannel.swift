@@ -11,6 +11,8 @@ public struct WKChannel: WKChannelProtocol {
     
     public var middlewares = [Middleware]()
     
+    public var webView: WKWebView?
+    
     public init() {
         
     }
