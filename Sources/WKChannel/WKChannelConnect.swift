@@ -24,6 +24,10 @@ public struct WKChannelConnect {
         return WKChannelScriptMessageHandler(self)
     }()
     
+    public lazy var channelScript: WKUserScript = {
+        WKUserScript(source: "window.webkit.messageChannel = \"\(name)\"", injectionTime: .atDocumentStart, forMainFrameOnly: false)
+    }()
+    
     public init(_ channel: WKChannel, _ name: String = "WKCHANNEL_NAME_DEFAULT") {
         _name = name
         _channel = channel
