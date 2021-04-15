@@ -46,9 +46,15 @@ public struct WKChannelCallback: WKChannelMessage {
     
     public func toString() -> String {
         do {
-            let json = try JSONSerialization.data(withJSONObject: arguments)
+            let argJson = try JSONSerialization.data(withJSONObject: arguments)
             let optJson = try JSONSerialization.data(withJSONObject: options)
-            return "\(name)(\(String(data: json, encoding: .utf8) ?? ""), \(String(data: optJson, encoding: .utf8) ?? "" ))"
+            return """
+                {
+                    name: "\(name)",
+                    arguments: \(String(data: argJson, encoding: .utf8) ?? "{}"),
+                    options: \(String(data: optJson, encoding: .utf8) ?? "{}")
+                }
+                """
         } catch {
             debugPrint("Invalid format: please check your callback arguments")
             return name

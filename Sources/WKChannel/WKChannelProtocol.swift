@@ -86,7 +86,7 @@ extension WKChannelProtocol {
             debugPrint("WKChannel: please set webView property")
             return
         }
-        webView.evaluateJavaScript(message.toString()) { (data: Any?, error: Error?) in
+        webView.evaluateJavaScript("window.webkit.messageChannelHandler(\(message.toString()))") { (data: Any?, error: Error?) in
             debugPrint("WKChannel: callback ", (error == nil) ? "completes": "fails")
             debugPrint("Callback: ", error ?? data ?? "empty")
             debugPrint("WKChannel: post message end")
