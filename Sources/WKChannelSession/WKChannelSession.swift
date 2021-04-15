@@ -34,6 +34,13 @@ public struct WKChannelSession: WKChannelProtocol {
         guard var channel = sessions[session] else {
             return
         }
+        channel.add { (context: WKChannelContext, next: @escaping WKChannel.MiddlewareNext) in
+            next(context) { (context, pre) in
+                var context = context
+                context.callback?.options["session"] = session
+                pre(context)
+            }
+        }
         channel.call(message, webView)
     }
 }
