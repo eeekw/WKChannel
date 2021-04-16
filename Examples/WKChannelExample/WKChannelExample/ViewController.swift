@@ -20,34 +20,51 @@ class ViewController: UIViewController, WKNavigationDelegate {
         var channel = WKChannel()
         self.channel = channel
         channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
-            print("WKChannelExample: ", "first middleware: ", "event: ", context.event, separator: "\n--", terminator: "\n\n")
-            var context = context
-            context.event.arguments["newKey"] = "newValue"
+            if context.event.name == "printMiddleware" {
+                debugPrint("WKChannelExample: first middleware")
+                debugPrint("WKChannelExample: event is \(context.event)")
+                var context = context
+                context.event.arguments["newKey"] = "newValue"
+                next(context) { context, pre in
+                    debugPrint("WKChannelExample: first middleware")
+                    debugPrint("WKChannelExample: callback is \(String(describing: context.callback))")
+                    pre(context)
+                }
+                return
+            }
             next(context) { context, pre in
-                print("WKChannelExample: ", "first middleware: ", "callback: ", context.callback ?? "", separator: "\n--", terminator: "\n\n")
                 pre(context)
             }
         }
         
         channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
-            print("WKChannelExample: ", "second middleware: ", "event: ", context.event, separator: "\n--", terminator: "\n\n")
-            next(context) { context, pre in
-                var context = context
-                print("WKChannelExample: ", "second middleware: ", "callback: ", context.callback ?? "", separator: "\n--", terminator: "\n\n")
-                guard var cb = context.callback else {
+            if context.event.name == "printMiddleware" {
+                debugPrint("WKChannelExample: second middleware")
+                debugPrint("WKChannelExample: event is \(context.event)")
+                next(context) { context, pre in
+                    var context = context
+                    guard var cb = context.callback else {
+                        pre(context)
+                        return
+                    }
+                    cb.arguments["newNumber"] = 999
+                    cb.arguments["newString"] = "newValue"
+                    context.callback = cb
+                    debugPrint("WKChannelExample: second middleware")
+                    debugPrint("WKChannelExample: callback is \(String(describing: context.callback))")
                     pre(context)
-                    return
                 }
-                cb.arguments["newCallbackNumber"] = 999
-                cb.arguments["newCallbackString"] = "newCallbackValue"
-                context.callback = cb
+                return
+            }
+            next(context) { context, pre in
                 pre(context)
             }
         }
         
         channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
             if context.event.name == "printCallback" {
-                print("printCallback: ", context.event.arguments)
+                debugPrint("WKChannelExample: printCallback")
+                debugPrint("WKChannelExample: context is \(context)")
             }
             next(context) { context, pre in
                 pre(context)
@@ -55,8 +72,9 @@ class ViewController: UIViewController, WKNavigationDelegate {
         }
         
         channel.add { (context: WKChannelContext, next: WKChannelMiddlewareNext) in
-            if context.event.name == "printHandlePost" {
-                print("printHandlePost: ", context.event.arguments)
+            if context.event.name == "printPost" {
+                debugPrint("WKChannelExample: printPost")
+                debugPrint("WKChannelExample: context is \(context)")
             }
             next(context) { context, pre in
                 pre(context)
@@ -67,6 +85,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         let userContentController = WKUserContentController()
         userContentController.add(connect.scriptMessageHandler, name: connect.name)
+        userContentController.addUserScript(connect.channelScript)
         
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = userContentController
@@ -84,28 +103,26 @@ class ViewController: UIViewController, WKNavigationDelegate {
         let bottom = NSLayoutConstraint(item: webView, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottomMargin, multiplier: 1.0, constant: 0.0)
         
         NSLayoutConstraint.activate([leading, trailing, top, bottom])
-        
-        webView.evaluateJavaScript("""
-            window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({
-            name: "eventName",
-            arguments: {a: 1,b: 2},
-            options: {callback: "callbackName"}
-            })
-            function callbackName(parameter) {
-                window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({name: "printCallback", arguments: parameter})
-                return "callback return"
-            }
-            function handlePost(parameter) {
-                window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({name: "printHandlePost", arguments: parameter})
-                return "callback return"
-            }
-            """, completionHandler: nil)
     }
     
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        webView.evaluateJavaScript("""
+            window.webkit.messageChannelHandler = function (parameter) {
+                window.webkit.messageHandlers[window.webkit.messageChannel].postMessage(parameter)
+                return "Evaluate JavaScript: return"
+            }
+            window.webkit.messageHandlers[window.webkit.messageChannel].postMessage({
+            name: "printMiddleware",
+            })
+            window.webkit.messageHandlers[window.webkit.messageChannel].postMessage({
+            name: "eventName",
+            arguments: {a: 1,b: 2},
+            options: {callback: "printCallback"}
+            })
+            """, completionHandler: nil)
         
         channel?.webView = webView
-        channel?.post(WKChannelCallback(name: "handlePost"))
+        channel?.post(WKChannelCallback(name: "printPost"))
     }
 }
 
