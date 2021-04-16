@@ -9,9 +9,9 @@ public struct WKChannelConnect {
         _name
     }
     
-    private var _channel: WKChannel
+    private var _channel: WKChannelProtocol
     
-    public var channel: WKChannel {
+    public var channel: WKChannelProtocol {
         get {
             _channel
         }
@@ -28,7 +28,7 @@ public struct WKChannelConnect {
         WKUserScript(source: "window.webkit.messageChannel = \"\(name)\"", injectionTime: .atDocumentStart, forMainFrameOnly: false)
     }()
     
-    public init(_ channel: WKChannel, _ name: String = "WKCHANNEL_NAME_DEFAULT") {
+    public init(_ channel: WKChannelProtocol, _ name: String = "WKCHANNEL_NAME_DEFAULT") {
         _name = name
         _channel = channel
     }
