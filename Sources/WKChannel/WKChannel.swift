@@ -7,7 +7,7 @@
 
 import WebKit
 
-public struct WKChannel: WKChannelProtocol {
+public class WKChannel: WKChannelProtocol {
     
     public var middlewares = [Middleware]()
     

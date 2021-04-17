@@ -7,15 +7,15 @@
 
 import WebKit
 
-public protocol WKChannelReceive {
-    mutating func call(_ message: Any, _ webView: WKWebView) -> Void
+public protocol WKChannelReceive: AnyObject {
+    func call(_ message: Any, _ webView: WKWebView) -> Void
 }
 
-public protocol WKChannelSend {
+public protocol WKChannelSend: AnyObject {
     
     var webView: WKWebView? { get set }
     
-    mutating func post(_ message: WKChannelMessage) -> Void
+    func post(_ message: WKChannelMessage) -> Void
 }
 
 public protocol WKChannelProtocol: WKChannelReceive, WKChannelSend {
@@ -24,16 +24,16 @@ public protocol WKChannelProtocol: WKChannelReceive, WKChannelSend {
         get set
     }
     
-    mutating func add(_ fn: @escaping WKChannel.Middleware) -> Void
+    func add(_ fn: @escaping WKChannel.Middleware) -> Void
 }
 
 extension WKChannelProtocol {
             
-    public mutating func add(_ fn: @escaping WKChannel.Middleware) -> Void {
+    public func add(_ fn: @escaping WKChannel.Middleware) -> Void {
         middlewares.append(fn)
     }
     
-    public mutating func process(_ message: Any, _ webView: WKWebView) -> Void {
+    public func process(_ message: Any, _ webView: WKWebView) -> Void {
         let fn = compose(middlewares)
         
         debugPrint("WKChannel: start")
@@ -59,28 +59,25 @@ extension WKChannelProtocol {
         
         debugPrint("WKChannel: call middleware")
         
-        withUnsafeMutablePointer(to: &self) { (pointer) -> Void in
-            fn(context) { context in
-                var pointee = pointer.pointee
-                guard let callback = context.callback else {
-                    debugPrint("WKChannel: end")
-                    return
-                }
-                debugPrint("WKChannel: send callback")
-                pointee.webView = webView
-                pointee.post(callback)
+        fn(context) { [weak self] context in
+            guard let callback = context.callback else {
+                debugPrint("WKChannel: end")
+                return
             }
+            debugPrint("WKChannel: send callback")
+            self?.webView = webView
+            self?.post(callback)
         }
     }
     
-    public mutating func call(_ message: Any, _ webView: WKWebView) -> Void {
+    public func call(_ message: Any, _ webView: WKWebView) -> Void {
         process(message, webView)
     }
 }
 
 extension WKChannelProtocol {
     
-    public mutating func post(_ message: WKChannelMessage) -> Void {
+    public func post(_ message: WKChannelMessage) -> Void {
         debugPrint("WKChannel: post message start")
         guard let webView = webView else {
             debugPrint("WKChannel: please set webView property")
