@@ -8,12 +8,14 @@
 import WebKit
 import WKChannel
 
-public struct WKChannelSession: WKChannelProtocol {
+public class WKChannelSession: WKChannelProtocol {
     public var middlewares = [WKChannel.Middleware]()
+    
+    public var webView: WKWebView?
     
     var sessions = [String: WKChannel]()
     
-    public mutating func get(_ name: String) -> WKChannel {
+    public func get(_ name: String) -> WKChannel {
         guard let session = sessions[name] else {
             let instance = WKChannel()
             sessions[name] = instance
@@ -26,12 +28,12 @@ public struct WKChannelSession: WKChannelProtocol {
         
     }
     
-    public mutating func call(_ message: Any, _ webView: WKWebView) {
-        guard let session = (message as? Dictionary<String, Dictionary<String, String>>)?["options"]?["session"] else {
+    public func call(_ message: Any, _ webView: WKWebView) {
+        guard let session = ((message as? Dictionary<String, Any>)?["options"] as? Dictionary<String, String>)?["session"] else {
             return
         }
         
-        guard var channel = sessions[session] else {
+        guard let channel = sessions[session] else {
             return
         }
         channel.add { (context: WKChannelContext, next: @escaping WKChannel.MiddlewareNext) in
