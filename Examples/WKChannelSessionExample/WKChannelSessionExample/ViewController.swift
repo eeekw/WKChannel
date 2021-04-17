@@ -19,18 +19,18 @@ class ViewController: UIViewController {
         
         var router = WKChannelRouter()
         
-        router.add("WKChannelRouter") { (context, next) in
+        router.add("WKChannelSession") { (context, next) in
             debugPrint("WKChannelSessionExample: ", context)
             next(context) { (context, pre) in
                 pre(context)
             }
         }
         
-        var session = WKChannelSession()
-        var channel = session.get("WKChannelSessionChannel")
+        let session = WKChannelSession()
+        let channel = session.get("WKChannelSessionChannel")
         channel.add(router.routes())
         
-        var connect = WKChannelConnect(channel)
+        var connect = WKChannelConnect(session)
         
         let userContentController = WKUserContentController()
         userContentController.add(connect.scriptMessageHandler, name: connect.name)
@@ -53,12 +53,12 @@ class ViewController: UIViewController {
         
         webView.evaluateJavaScript("""
                     window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({
-                    name: "WKChannelRouter",
+                    name: "WKChannelSession",
                     arguments: {a: 1,b: 2},
                     options: {session: "WKChannelSessionChannel"},
                     })
                     window.webkit.messageHandlers.WKCHANNEL_NAME_DEFAULT.postMessage({
-                    name: "WKChannelOther",
+                    name: "WKChannelSession",
                     arguments: {a: 1,b: 2}
                     })
                     """, completionHandler: nil)
